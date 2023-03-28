@@ -13,31 +13,28 @@ namespace TestProjectRIT.Controllers
     [Route("[controller]")]
     public class UsersController : ControllerBase
     {
+        private ApplicationContext _context = new ApplicationContext();
+
         [HttpGet]
         public IActionResult Get()
         {
-            using (var db = new ApplicationContext())
+            var users = _context.Users.ToList();
+
+            if (users.Count == 0 || users is null)
             {
-                var users = db.Users.ToList();
-                if (users.Count == 0 || users is null)
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    return Ok(JsonConvert.SerializeObject(users));
-                }
+                return NotFound();
+            }
+            else
+            {
+                return Ok(JsonConvert.SerializeObject(users));
             }
         }
 
         [HttpPost]
         public IActionResult Post([FromBody] User user)
         {
-            using (var db = new ApplicationContext())
-            {
-                db.Users.Add(user);
-                db.SaveChanges();
-            }
+            _context.Users.Add(user);
+            _context.SaveChanges();
 
             return Ok(JsonConvert.SerializeObject(user));
         }
@@ -45,40 +42,32 @@ namespace TestProjectRIT.Controllers
         [HttpPut("{id}")]
         public IActionResult Put(int id, [FromBody] User user)
         {
-            using (var db = new ApplicationContext())
+            var currentUser = _context.Users.Find(id);
+            if (currentUser is not null)
             {
-                var currentUser = db.Users.Find(id);
-                if (currentUser is not null)
-                {
-                    db.Update(user);
-                    db.SaveChanges();
-                    return Ok();
-                }
-                else
-                {
-                    return NotFound();
-                }
-
+                _context.Update(user);
+                _context.SaveChanges();
+                return Ok();
+            }
+            else
+            {
+                return NotFound();
             }
         }
 
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            using (var db = new ApplicationContext())
+            var currentUser = _context.Users.Find(id);
+            if (currentUser is not null)
             {
-                var currentUser = db.Users.Find(id);
-                if(currentUser is not null)
-                {
-                    db.Remove(currentUser);
-                    db.SaveChanges();
-                    return Ok();
-                }
-                else
-                {
-                    return NotFound();
-                }
-                
+                _context.Remove(currentUser);
+                _context.SaveChanges();
+                return Ok();
+            }
+            else
+            {
+                return NotFound();
             }
         }
     }

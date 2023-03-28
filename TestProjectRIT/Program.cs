@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -11,6 +12,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using TestProjectRIT.Database;
 using TestProjectRIT.TCP;
 
 namespace TestProjectRIT
@@ -20,6 +22,11 @@ namespace TestProjectRIT
 
         public static void Main(string[] args)
         {
+            using (var context = new ApplicationContext())
+            {
+                context.Database.Migrate();
+            }
+
             var config = new ConfigurationBuilder().AddJsonFile("appsettings.json", optional: true, reloadOnChange: true).Build();
             var tcpServer = new TcpServer();
             tcpServer.Start(Convert.ToInt32(config["AppSettings:TcpPort"]));
